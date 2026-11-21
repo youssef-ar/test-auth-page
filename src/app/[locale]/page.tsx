@@ -1,10 +1,10 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SectorTag } from "@/components/sectors/sector-tag";
 import { SECTORS } from "@/components/sectors/sectors";
 import { PasswordInput } from "@/components/ui/password-input";
 
-// Start page: preview of the building blocks copied from the Stolos web app. Replace it with your own screens.
 
 const visibilityLabels = { show: "Show password", hide: "Hide password" };
 
@@ -13,9 +13,9 @@ export default function HomePage() {
     <main className="mx-auto flex w-full max-w-[36rem] flex-col gap-8 p-8">
       <header className="flex items-baseline justify-between">
         <h1 className="text-m font-semibold">UI kit</h1>
-        <a className="text-sx text-primary underline" href="/code">
+        <Link className="text-sx text-primary underline" href="/code">
           /code
-        </a>
+        </Link>
       </header>
 
       <section className="glassmorphism flex flex-col gap-6 rounded-m p-8">
