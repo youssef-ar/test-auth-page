@@ -14,6 +14,9 @@ const loginPageContent = {
       title: t({ fr: "Bienvenue sur Stolos !", en: "Welcome to Stolos!" }),
       subtitle: t({ fr: "Créez votre compte", en: "Create your account" }),
     },
+    verify: {
+      title: t({ fr: "Confirmez votre identité", en: "Confirm your identity" }),
+    },
   },
 } satisfies Dictionary;
 
