@@ -7,7 +7,6 @@ import { useIntlayer, useLocale } from "next-intlayer";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { authClient } from "@/lib/auth-client";
 import { AuthRequestError, callAuth } from "../errors";
@@ -16,6 +15,7 @@ import { useAuthErrorMessage } from "../use-auth-error-message";
 import { AuthCard } from "./auth-card";
 import { FormError } from "./form-error";
 import { TextButton } from "./text-button";
+import { PrimaryButton } from "./primary-button";
 
 export const RecoveryCodeStep = ({ onExpired }: { onExpired: () => void }) => {
   const { recovery } = useIntlayer("mfa");
@@ -62,16 +62,12 @@ export const RecoveryCodeStep = ({ onExpired }: { onExpired: () => void }) => {
           errorMessage={errors.code?.message}
           className="mt-[2.4375rem]"
         />
-        <Button
+        <PrimaryButton
           type="submit"
-          variant="primary"
-          alignment="center"
-          textSize="base"
           isLoading={verify.isPending || verify.isSuccess}
-          className="mt-2xl h-[3.1875rem] w-full rounded-s font-semibold text-white/90 hover:bg-primary-500"
         >
           {recovery.submit}
-        </Button>
+        </PrimaryButton>
       </form>
       <TextButton onClick={() => mfaSession.update({ view: "code" })} className="mx-auto mt-[2.25rem]">
         {recovery.useVerificationCode}

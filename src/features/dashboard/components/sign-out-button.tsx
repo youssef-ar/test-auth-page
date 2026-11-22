@@ -3,10 +3,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useIntlayer, useLocale } from "next-intlayer";
-import { Button } from "@/components/ui/button";
 import { FormError } from "@/features/auth/components/form-error";
 import { callAuth } from "@/features/auth/errors";
 import { authClient } from "@/lib/auth-client";
+import { PrimaryButton } from "@/features/auth/components/primary-button";
 
 export const SignOutButton = () => {
   const { signOut: label, signOutError } = useIntlayer("dashboard");
@@ -25,17 +25,13 @@ export const SignOutButton = () => {
   return (
     <>
       <FormError message={signOut.isError ? signOutError.value : undefined} className="mt-xl" />
-      <Button
+      <PrimaryButton
         type="button"
-        variant="primary"
-        alignment="center"
-        textSize="base"
         isLoading={signOut.isPending || signOut.isSuccess}
         onClick={() => signOut.mutate()}
-        className="mt-2xl h-[3.1875rem] w-full rounded-s font-semibold text-white/90 hover:bg-primary-500"
       >
         {label}
-      </Button>
+      </PrimaryButton>
     </>
   );
 };

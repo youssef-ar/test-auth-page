@@ -7,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 import { useIntlayer, useLocale } from "next-intlayer";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
 import { AuthRequestError, callAuth } from "../errors";
@@ -18,9 +17,8 @@ import { useValidationMessages } from "../use-validation-messages";
 import { AuthCard } from "./auth-card";
 import { FormError } from "./form-error";
 import { TextLink } from "./text-button";
+import { PrimaryButton } from "./primary-button";
 
-const primaryButtonClass =
-  "mt-2xl h-[3.1875rem] w-full rounded-s font-semibold text-white/90 hover:bg-primary-500";
 
 type ResetState = "form" | "invalid" | "done";
 
@@ -75,16 +73,12 @@ const ResetPasswordForm = ({ token, onStateChange }: { token: string; onStateCha
             errorMessage={errors.confirmPassword?.message}
           />
         </div>
-        <Button
+        <PrimaryButton
           type="submit"
-          variant="primary"
-          alignment="center"
-          textSize="base"
           isLoading={reset.isPending}
-          className={primaryButtonClass}
         >
           {content.reset.submit}
-        </Button>
+        </PrimaryButton>
       </form>
       <TextLink href={`/${locale}/login`} className="mx-auto mt-[2.25rem]">
         {content.backToSignIn}
@@ -102,11 +96,11 @@ const InvalidLink = () => {
       <p role="alert" className="mt-[0.625rem] text-center text-s leading-[1.1875rem] font-light text-white/80">
         {content.invalid.body}
       </p>
-      <Button asChild variant="primary" alignment="center" textSize="base" className={primaryButtonClass}>
+      <PrimaryButton asChild>
         <Link href={`/${locale}/forgot-password`} onClick={passwordResetRequest.clear}>
           {content.invalid.requestNew}
         </Link>
-      </Button>
+      </PrimaryButton>
       <TextLink href={`/${locale}/login`} className="mx-auto mt-[2.25rem]">
         {content.backToSignIn}
       </TextLink>
@@ -123,9 +117,9 @@ const PasswordChanged = () => {
       <p role="status" className="mt-[0.625rem] text-center text-s leading-[1.1875rem] font-light text-white/80">
         {content.done.body}
       </p>
-      <Button asChild variant="primary" alignment="center" textSize="base" className={primaryButtonClass}>
+      <PrimaryButton asChild>
         <Link href={`/${locale}/login`}>{content.done.signIn}</Link>
-      </Button>
+      </PrimaryButton>
     </AuthCard>
   );
 };

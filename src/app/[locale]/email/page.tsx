@@ -5,6 +5,9 @@ import { Suspense } from "react";
 import { NoResetEmail, ResetPasswordEmail } from "@/features/email/components/reset-password-email";
 import { DEFAULT_LOCALE, isSupportedLocale } from "@/lib/i18n";
 import { getLatestPasswordResetMail } from "@/server/dev-mail";
+import { pageMetadata } from "@/lib/page-metadata";
+
+export const generateMetadata = () => pageMetadata("email");
 
 const getLocale = async () => {
   const locale = await getLocaleParam();

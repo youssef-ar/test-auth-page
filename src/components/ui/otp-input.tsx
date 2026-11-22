@@ -105,8 +105,8 @@ export const OtpInput = ({
           aria-invalid={invalid || undefined}
           placeholder="0"
           className={cn(
-            "h-[4.9375rem] w-[3.25rem] rounded-xs border border-white/40 bg-transparent text-center text-l text-white",
-            "transition-colors placeholder:text-white/30 hover:border-white/60 focus:border-white/80 focus:outline-none",
+            "h-[5rem] w-[3.25rem] rounded-xs border border-white bg-transparent text-center text-l text-white",
+            "transition-colors placeholder:text-white/20 focus:bg-white/10 focus:outline-none",
             "disabled:opacity-50",
             invalid && "border-danger hover:border-danger focus:border-danger",
           )}

@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { useIntlayer, useLocale } from "next-intlayer";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { TextField } from "@/components/ui/text-field";
 import { authClient } from "@/lib/auth-client";
@@ -17,6 +16,7 @@ import { readTwoFactorMethods, type TwoFactorMethod } from "../two-factor";
 import { useAuthErrorMessage } from "../use-auth-error-message";
 import { useValidationMessages } from "../use-validation-messages";
 import { FormError } from "./form-error";
+import { PrimaryButton } from "./primary-button";
 
 type SignInFormProps = {
   notice?: string;
@@ -74,16 +74,13 @@ export const SignInForm = ({ notice, onTwoFactorRequired }: SignInFormProps) => 
       >
         {content.forgotPassword}
       </Link>
-      <Button
+      <PrimaryButton
         type="submit"
-        variant="primary"
-        alignment="center"
-        textSize="base"
         isLoading={isBusy}
-        className="mt-[2.25rem] h-[3.1875rem] w-full rounded-s font-semibold text-white/90 hover:bg-primary-500"
+        className="mt-[2.25rem]"
       >
         {content.signIn}
-      </Button>
+      </PrimaryButton>
     </form>
   );
 };

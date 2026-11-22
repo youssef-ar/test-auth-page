@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useIntlayer, useLocale } from "next-intlayer";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { createForgotPasswordSchema, type ForgotPasswordValues } from "../schemas";
 import { useAuthErrorMessage } from "../use-auth-error-message";
@@ -13,6 +12,7 @@ import { useValidationMessages } from "../use-validation-messages";
 import { AuthCard } from "./auth-card";
 import { FormError } from "./form-error";
 import { TextLink } from "./text-button";
+import { PrimaryButton } from "./primary-button";
 
 export const ForgotPasswordForm = () => {
   const content = useIntlayer("password-reset");
@@ -44,18 +44,14 @@ export const ForgotPasswordForm = () => {
           label={form.email}
           errorMessage={errors.email?.message}
         />
-        <Button
+        <PrimaryButton
           type="submit"
-          variant="primary"
-          alignment="center"
-          textSize="base"
           isLoading={request.isPending}
           disabled={cooldown.isActive}
-          className="mt-2xl h-[3.1875rem] w-full rounded-s font-semibold text-white/90 hover:bg-primary-500"
         >
           {content.request.submit}
           {cooldown.isActive && ` ${String(content.cooldown({ seconds: cooldown.remaining }))}`}
-        </Button>
+        </PrimaryButton>
       </form>
       <TextLink href={`/${locale}/login`} className="mx-auto mt-[2.25rem]">
         {content.backToSignIn}

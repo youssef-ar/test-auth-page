@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useIntlayer, useLocale } from "next-intlayer";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { TextField } from "@/components/ui/text-field";
 import { authClient } from "@/lib/auth-client";
@@ -15,6 +14,7 @@ import { createSignUpSchema, type SignUpValues } from "../schemas";
 import { useAuthErrorMessage } from "../use-auth-error-message";
 import { useValidationMessages } from "../use-validation-messages";
 import { FormError } from "./form-error";
+import { PrimaryButton } from "./primary-button";
 
 // Better Auth requires a name; the Figma form has none, so the email's local part stands in.
 const nameFromEmail = (email: string) => email.split("@")[0];
@@ -77,16 +77,12 @@ export const SignUpForm = () => {
           errorMessage={errors.confirmPassword?.message}
         />
       </div>
-      <Button
+      <PrimaryButton
         type="submit"
-        variant="primary"
-        alignment="center"
-        textSize="base"
         isLoading={signUp.isPending || signUp.isSuccess}
-        className="mt-2xl h-[3.1875rem] w-full rounded-s font-semibold text-white/90 hover:bg-primary-500"
       >
         {content.signUp}
-      </Button>
+      </PrimaryButton>
     </form>
   );
 };

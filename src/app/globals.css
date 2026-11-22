@@ -15,6 +15,11 @@
     background: var(--app-background);
     letter-spacing: -0.02em;
   }
+
+  :where(a, button, [role="tab"], [tabindex]):focus-visible {
+    outline: 2px solid var(--color-primary-200);
+    outline-offset: 2px;
+  }
 }
 
 @theme {
@@ -41,6 +46,7 @@
   --color-success-800: color-mix(in oklab, var(--color-success) 90%, transparent);
 
   --color-danger: #dc3848;
+  --color-danger-light: #f27a85;
   --color-danger-50: color-mix(in oklab, var(--color-danger) 10%, transparent);
   --color-danger-100: color-mix(in oklab, var(--color-danger) 20%, transparent);
   --color-danger-200: color-mix(in oklab, var(--color-danger) 30%, transparent);
@@ -148,4 +154,28 @@
     inset 2px -6.5px 1px -4px color-mix(in srgb, var(--c-dark) 20%, transparent),
     0px 1px 5px 0px color-mix(in srgb, var(--c-dark) 20%, transparent),
     0px 6px 16px 0px color-mix(in srgb, var(--c-dark) 16%, transparent);
+}
+
+
+@layer components {
+  @media (max-height: 899px) { .auth-stage { zoom: 0.9778; } }
+  @media (max-height: 879px) { .auth-stage { zoom: 0.9556; } }
+  @media (max-height: 859px) { .auth-stage { zoom: 0.9333; } }
+  @media (max-height: 839px) { .auth-stage { zoom: 0.9111; } }
+  @media (max-height: 819px) { .auth-stage { zoom: 0.8889; } }
+  @media (max-height: 799px) { .auth-stage { zoom: 0.8667; } }
+  @media (max-height: 779px) { .auth-stage { zoom: 0.8444; } }
+  @media (max-height: 759px) { .auth-stage { zoom: 0.8222; } }
+  @media (max-height: 739px) { .auth-stage { zoom: 0.8000; } }
+  @media (max-height: 719px) { .auth-stage { zoom: 0.7778; } }
+  @media (max-height: 699px) { .auth-stage { zoom: 0.7556; } }
+  @media (max-height: 679px) { .auth-stage { zoom: 0.7333; } }
+  @media (max-height: 659px) { .auth-stage { zoom: 0.7111; } }
+  @media (max-height: 639px) { .auth-stage { zoom: 0.6889; } }
+  @media (max-height: 619px) { .auth-stage { zoom: 0.6667; } }
+  @media (max-height: 599px) { .auth-stage { zoom: 0.6444; } }
+  @media (max-height: 579px) { .auth-stage { zoom: 0.6222; } }
+  @media (max-height: 559px) { .auth-stage { zoom: 0.6000; } }
+  @media (max-height: 539px) { .auth-stage { zoom: 0.5778; } }
+  @media (max-height: 519px) { .auth-stage { zoom: 0.5556; } }
 }

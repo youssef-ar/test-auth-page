@@ -5,10 +5,12 @@ import Link from "next/link";
 
 export default function LocaleNotFound() {
   const { title, backToLogin } = useIntlayer("not-found");
+  const { notFound } = useIntlayer("page-titles");
   const { locale } = useLocale();
 
   return (
     <main className="mx-auto flex w-full max-w-[36rem] flex-1 flex-col items-center justify-center gap-m p-8 text-center">
+      <title>{`${notFound.value} — Stolos`}</title>
       <h1 className="text-m font-semibold">{title}</h1>
       <Link className="text-sx text-primary underline" href={`/${locale}/login`}>
         {backToLogin}

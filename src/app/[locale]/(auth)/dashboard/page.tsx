@@ -6,6 +6,9 @@ import { AccountSummary } from "@/features/dashboard/components/account-summary"
 import { SignOutButton } from "@/features/dashboard/components/sign-out-button";
 import { DEFAULT_LOCALE, isSupportedLocale } from "@/lib/i18n";
 import { type CurrentUser, getCurrentUser } from "@/server/session";
+import { pageMetadata } from "@/lib/page-metadata";
+
+export const generateMetadata = () => pageMetadata("dashboard");
 
 const getLocale = async () => {
   const locale = await getLocaleParam();
