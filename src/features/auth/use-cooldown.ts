@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-
+import { useCallback, useSyncExternalStore } from "react";
 
 export const RESEND_COOLDOWN_SECONDS = 30;
 
@@ -20,49 +19,34 @@ const readDeadline = (key: string) => {
 const writeDeadline = (key: string, deadline: number) => {
   try {
     window.localStorage.setItem(storageKey(key), String(deadline));
-  } catch {
-    
-  }
+  } catch {}
   listeners.forEach((listener) => listener());
 };
 
 const subscribe = (listener: () => void) => {
   listeners.add(listener);
   window.addEventListener("storage", listener);
+  const tick = window.setInterval(listener, 250);
   return () => {
     listeners.delete(listener);
     window.removeEventListener("storage", listener);
+    window.clearInterval(tick);
   };
 };
 
 // The deadline is stored as a timestamp, so the countdown stays right after a reload or in another tab.
 export const useCooldown = (key: string) => {
-  const deadline = useSyncExternalStore(
+  const remaining = useSyncExternalStore(
     subscribe,
-    () => readDeadline(key),
+    () => Math.max(0, Math.ceil((readDeadline(key) - Date.now()) / 1000)),
     () => 0,
   );
-  const [now, setNow] = useState(() => Date.now());
 
-  useEffect(() => {
-    if (deadline <= Date.now()) return;
-    const interval = window.setInterval(() => {
-      const current = Date.now();
-      setNow(current);
-      if (current >= deadline) window.clearInterval(interval);
-    }, 250);
-    return () => window.clearInterval(interval);
-  }, [deadline]);
-
+  // On a 429 the server's X-Retry-After wins over the default.
   const start = useCallback(
-    (seconds: number = RESEND_COOLDOWN_SECONDS) => {
-      const current = Date.now();
-      setNow(current);
-      writeDeadline(key, current + seconds * 1000);
-    },
+    (seconds: number = RESEND_COOLDOWN_SECONDS) => writeDeadline(key, Date.now() + seconds * 1000),
     [key],
   );
 
-  const remaining = Math.max(0, Math.ceil((deadline - now) / 1000));
   return { remaining, isActive: remaining > 0, start };
 };

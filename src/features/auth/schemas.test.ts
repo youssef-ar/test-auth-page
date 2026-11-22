@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createSignInSchema, createSignUpSchema, type ValidationMessages } from "./schemas";
+import {
+  createForgotPasswordSchema,
+  createResetPasswordSchema,
+  createSignInSchema,
+  createSignUpSchema,
+  type ValidationMessages,
+} from "./schemas";
 
 const messages: ValidationMessages = {
   emailRequired: "emailRequired",
@@ -47,5 +53,26 @@ describe("sign-up schema", () => {
     expect(schema.safeParse({ email: "a@b.co", password: "long-enough", confirmPassword: "long-enough" }).success).toBe(
       true,
     );
+  });
+});
+
+describe("forgot-password schema", () => {
+  it("needs a valid email", () => {
+    const schema = createForgotPasswordSchema(messages);
+    expect(issues(schema.safeParse({ email: "" }))).toEqual({ email: "emailRequired" });
+    expect(issues(schema.safeParse({ email: "nope" }))).toEqual({ email: "emailInvalid" });
+  });
+});
+
+describe("reset-password schema", () => {
+  const schema = createResetPasswordSchema(messages);
+
+  it("applies the same rules as sign-up", () => {
+    expect(issues(schema.safeParse({ password: "short", confirmPassword: "short" }))).toEqual({
+      password: "passwordTooShort",
+    });
+    expect(issues(schema.safeParse({ password: "long-enough", confirmPassword: "other-one" }))).toEqual({
+      confirmPassword: "passwordsMismatch",
+    });
   });
 });

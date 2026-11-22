@@ -12,6 +12,7 @@ import { useAuthErrorMessage } from "../use-auth-error-message";
 import { useCooldown } from "../use-cooldown";
 import { AuthCard } from "./auth-card";
 import { FormError } from "./form-error";
+import { ResendButton } from "./resend-button";
 import { TextButton } from "./text-button";
 
 export const OTP_COOLDOWN_KEY = "two-factor-otp";
@@ -127,23 +128,14 @@ export const VerificationCodeStep = ({ session, onExpired }: VerificationCodeSte
       </p>
       <div className="mt-[0.5625rem] flex flex-col items-center">
         {showResend ? (
-          <TextButton
+          <ResendButton
+            label={content.resendCode}
+            remaining={cooldown.remaining}
+            countdown={String(content.cooldown({ seconds: cooldown.remaining }))}
+            countdownLabel={String(content.cooldownLabel({ seconds: cooldown.remaining }))}
             onClick={() => sendCode.mutate()}
-            disabled={cooldown.isActive || sendCode.isPending}
-            aria-describedby={cooldown.isActive ? "otp-cooldown" : undefined}
-          >
-            <span className={cooldown.isActive ? "text-white/50" : undefined}>{content.resendCode}</span>
-            {cooldown.isActive && (
-              <>
-                <span aria-hidden className="ml-s text-white/80">
-                  {String(content.cooldown({ seconds: cooldown.remaining }))}
-                </span>
-                <span id="otp-cooldown" className="sr-only">
-                  {String(content.cooldownLabel({ seconds: cooldown.remaining }))}
-                </span>
-              </>
-            )}
-          </TextButton>
+            isPending={sendCode.isPending}
+          />
         ) : (
           variant === "both" && (
             <TextButton onClick={() => sendCode.mutate()} disabled={sendCode.isPending}>

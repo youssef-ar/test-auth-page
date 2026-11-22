@@ -24,20 +24,28 @@ export const createSignInSchema = (m: ValidationMessages) =>
     password: z.string().min(1, { error: m.passwordRequired }),
   });
 
+const newPasswordFields = (m: ValidationMessages) => ({
+  password: z
+    .string()
+    .min(1, { error: m.passwordRequired })
+    .min(PASSWORD_MIN_LENGTH, { error: m.passwordTooShort }),
+  confirmPassword: z.string().min(1, { error: m.passwordRequired }),
+});
+
+const passwordsMatch = (values: { password: string; confirmPassword: string }) =>
+  values.password === values.confirmPassword;
+
+const mismatchIssue = (m: ValidationMessages) => ({ error: m.passwordsMismatch, path: ["confirmPassword"] });
+
 export const createSignUpSchema = (m: ValidationMessages) =>
-  z
-    .object({
-      email: emailSchema(m),
-      password: z
-        .string()
-        .min(1, { error: m.passwordRequired })
-        .min(PASSWORD_MIN_LENGTH, { error: m.passwordTooShort }),
-      confirmPassword: z.string().min(1, { error: m.passwordRequired }),
-    })
-    .refine((values) => values.password === values.confirmPassword, {
-      error: m.passwordsMismatch,
-      path: ["confirmPassword"],
-    });
+  z.object({ email: emailSchema(m), ...newPasswordFields(m) }).refine(passwordsMatch, mismatchIssue(m));
+
+export const createForgotPasswordSchema = (m: ValidationMessages) => z.object({ email: emailSchema(m) });
+
+export const createResetPasswordSchema = (m: ValidationMessages) =>
+  z.object(newPasswordFields(m)).refine(passwordsMatch, mismatchIssue(m));
 
 export type SignInValues = z.infer<ReturnType<typeof createSignInSchema>>;
 export type SignUpValues = z.infer<ReturnType<typeof createSignUpSchema>>;
+export type ForgotPasswordValues = z.infer<ReturnType<typeof createForgotPasswordSchema>>;
+export type ResetPasswordValues = z.infer<ReturnType<typeof createResetPasswordSchema>>;
