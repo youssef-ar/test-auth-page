@@ -2,6 +2,9 @@ export type AuthErrorKey =
   | "invalidCredentials"
   | "emailTaken"
   | "invalidCode"
+  | "invalidRecoveryCode"
+  | "codeAttemptsExceeded"
+  | "accountLocked"
   | "sessionExpired"
   | "invalidToken"
   | "tooManyRequests"
@@ -11,6 +14,10 @@ const KEYS_BY_CODE: Record<string, AuthErrorKey> = {
   INVALID_EMAIL_OR_PASSWORD: "invalidCredentials",
   USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "emailTaken",
   INVALID_CODE: "invalidCode",
+  INVALID_BACKUP_CODE: "invalidRecoveryCode",
+  OTP_HAS_EXPIRED: "invalidCode",
+  TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE: "codeAttemptsExceeded",
+  ACCOUNT_TEMPORARILY_LOCKED: "accountLocked",
   INVALID_TWO_FACTOR_COOKIE: "sessionExpired",
   INVALID_TOKEN: "invalidToken",
 };

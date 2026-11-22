@@ -1,5 +1,7 @@
-// Stand-in for next-intlayer in tests: every entry renders as "<dictionary>.<path>",
-// exposes the same string as `.value`, and insertion entries (`*Retry`) are callable.
+// Stand-in for next-intlayer in tests: every entry renders as "<dictionary>.<path>" and exposes
+// the same string as `.value`. Entries built with `insert()` are callable and echo their values.
+const INSERTIONS = new Set(["tooManyRequestsRetry", "digitLabel", "cooldown", "cooldownLabel"]);
+
 const node = (path: string): unknown =>
   new Proxy(
     {},
@@ -10,7 +12,7 @@ const node = (path: string): unknown =>
         if (key === Symbol.toPrimitive) return () => path;
         if (typeof key === "symbol") return undefined;
         const child = `${path}.${key}`;
-        return key.endsWith("Retry") ? (values: Record<string, unknown>) => `${child}(${JSON.stringify(values)})` : node(child);
+        return INSERTIONS.has(key) ? (values: Record<string, unknown>) => `${child}(${JSON.stringify(values)})` : node(child);
       },
     },
   );

@@ -20,6 +20,18 @@ const authErrorsContent = {
       fr: "Votre tentative de connexion a expiré. Veuillez vous reconnecter.",
       en: "Your sign-in attempt has expired. Please sign in again.",
     }),
+    invalidRecoveryCode: t({
+      fr: "Ce code de récupération est invalide ou a déjà été utilisé.",
+      en: "This recovery code is invalid or has already been used.",
+    }),
+    codeAttemptsExceeded: t({
+      fr: "Trop d’essais avec ce code. Demandez-en un nouveau.",
+      en: "Too many tries with this code. Ask for a new one.",
+    }),
+    accountLocked: t({
+      fr: "Trop d’essais incorrects : votre compte est temporairement bloqué. Réessayez plus tard.",
+      en: "Too many incorrect tries: your account is temporarily locked. Please try again later.",
+    }),
     invalidToken: t({
       fr: "Ce lien est invalide, a expiré ou a déjà été utilisé.",
       en: "This link is invalid, has expired or has already been used.",

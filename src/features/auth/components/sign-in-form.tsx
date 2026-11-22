@@ -19,10 +19,11 @@ import { useValidationMessages } from "../use-validation-messages";
 import { FormError } from "./form-error";
 
 type SignInFormProps = {
+  notice?: string;
   onTwoFactorRequired: (methods: TwoFactorMethod[]) => void;
 };
 
-export const SignInForm = ({ onTwoFactorRequired }: SignInFormProps) => {
+export const SignInForm = ({ notice, onTwoFactorRequired }: SignInFormProps) => {
   const content = useIntlayer("auth-form");
   const { locale } = useLocale();
   const router = useRouter();
@@ -50,7 +51,7 @@ export const SignInForm = ({ onTwoFactorRequired }: SignInFormProps) => {
 
   return (
     <form noValidate onSubmit={handleSubmit((values) => signIn.mutate(values))} className="mt-xl flex flex-col">
-      <FormError message={getErrorMessage(signIn.error)} className="mb-m" />
+      <FormError message={signIn.isIdle ? notice : getErrorMessage(signIn.error)} className="mb-m" />
       <div className="flex flex-col gap-m">
         <TextField
           {...register("email")}
