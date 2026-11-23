@@ -44,3 +44,6 @@ next-env.d.ts
 
 # keep the example env file in git
 !.env.example
+
+# intlayer (generated dictionaries and types)
+.intlayer
