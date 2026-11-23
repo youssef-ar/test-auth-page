@@ -34,12 +34,15 @@ export class AuthRequestError extends Error {
 
 type BetterAuthError = { status?: number; code?: string; message?: string };
 
+// The code comes first: an account lockout is also a 429, but carries its own code.
 export const toAuthRequestError = (error: BetterAuthError, retryAfterHeader?: string | null) => {
+  const key = error.code ? KEYS_BY_CODE[error.code] : undefined;
+  if (key) return new AuthRequestError(key);
   if (error.status === 429) {
     const seconds = Number(retryAfterHeader);
     return new AuthRequestError("tooManyRequests", Number.isFinite(seconds) && seconds > 0 ? seconds : undefined);
   }
-  return new AuthRequestError((error.code && KEYS_BY_CODE[error.code]) || "unknown");
+  return new AuthRequestError("unknown");
 };
 
 // Better Auth returns `{ data, error }` and keeps the 429 header on the raw response only.

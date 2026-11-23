@@ -9,7 +9,7 @@ describe("toAuthRequestError", () => {
     ["INVALID_BACKUP_CODE", 401, "invalidRecoveryCode"],
     ["OTP_HAS_EXPIRED", 401, "invalidCode"],
     ["TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE", 400, "codeAttemptsExceeded"],
-    ["ACCOUNT_TEMPORARILY_LOCKED", 403, "accountLocked"],
+    ["ACCOUNT_TEMPORARILY_LOCKED", 429, "accountLocked"],
     ["INVALID_TWO_FACTOR_COOKIE", 401, "sessionExpired"],
     ["INVALID_TOKEN", 400, "invalidToken"],
     ["SOMETHING_NEW", 500, "unknown"],
@@ -21,6 +21,12 @@ describe("toAuthRequestError", () => {
     const error = toAuthRequestError({ status: 429 }, "7");
     expect(error.key).toBe("tooManyRequests");
     expect(error.retryAfter).toBe(7);
+  });
+
+  it("keeps the lockout distinct from a rate limit, although both are 429", () => {
+    const error = toAuthRequestError({ status: 429, code: "ACCOUNT_TEMPORARILY_LOCKED" }, "30");
+    expect(error.key).toBe("accountLocked");
+    expect(error.retryAfter).toBeUndefined();
   });
 
   it("ignores a missing or invalid X-Retry-After", () => {
