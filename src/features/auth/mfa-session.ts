@@ -62,7 +62,6 @@ const subscribe = (listener: () => void) => {
   return () => listeners.delete(listener);
 };
 
-// Kept in sessionStorage so a reload keeps the verification screen (same tab only, like the auth cookie).
 export const useMfaSession = () => {
   const raw = useSyncExternalStore(subscribe, readRaw, () => null);
   return useMemo(() => parse(raw), [raw]);
