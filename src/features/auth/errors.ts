@@ -6,6 +6,7 @@ export type AuthErrorKey =
   | "codeAttemptsExceeded"
   | "accountLocked"
   | "sessionExpired"
+  | "signInAttemptsExceeded"
   | "invalidToken"
   | "tooManyRequests"
   | "unknown";
@@ -31,6 +32,21 @@ export class AuthRequestError extends Error {
     this.name = "AuthRequestError";
   }
 }
+
+export type RestartReason = Extract<AuthErrorKey, "sessionExpired" | "signInAttemptsExceeded">;
+
+export const restartReasonOf = (error: unknown): RestartReason | null =>
+  error instanceof AuthRequestError && (error.key === "sessionExpired" || error.key === "signInAttemptsExceeded")
+    ? error.key
+    : null;
+
+
+export const endOfSignInAttempt = (error: unknown): never => {
+  if (error instanceof AuthRequestError && error.key === "codeAttemptsExceeded") {
+    throw new AuthRequestError("signInAttemptsExceeded");
+  }
+  throw error;
+};
 
 type BetterAuthError = { status?: number; code?: string; message?: string };
 

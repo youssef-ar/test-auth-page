@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AuthRequestError, callAuth, toAuthRequestError } from "./errors";
+import { AuthRequestError, callAuth, endOfSignInAttempt, restartReasonOf, toAuthRequestError } from "./errors";
 
 describe("toAuthRequestError", () => {
   it.each([
@@ -32,6 +32,28 @@ describe("toAuthRequestError", () => {
   it("ignores a missing or invalid X-Retry-After", () => {
     expect(toAuthRequestError({ status: 429 }, null).retryAfter).toBeUndefined();
     expect(toAuthRequestError({ status: 429 }, "soon").retryAfter).toBeUndefined();
+  });
+});
+
+describe("endOfSignInAttempt", () => {
+  it("turns used-up app or recovery code tries into the end of the sign-in attempt", () => {
+    expect(() => endOfSignInAttempt(new AuthRequestError("codeAttemptsExceeded"))).toThrow(
+      expect.objectContaining({ key: "signInAttemptsExceeded" }),
+    );
+  });
+
+  it("rethrows any other error unchanged", () => {
+    const error = new AuthRequestError("invalidCode");
+    expect(() => endOfSignInAttempt(error)).toThrow(error);
+  });
+});
+
+describe("restartReasonOf", () => {
+  it("only reports the errors that end the sign-in attempt", () => {
+    expect(restartReasonOf(new AuthRequestError("sessionExpired"))).toBe("sessionExpired");
+    expect(restartReasonOf(new AuthRequestError("signInAttemptsExceeded"))).toBe("signInAttemptsExceeded");
+    expect(restartReasonOf(new AuthRequestError("codeAttemptsExceeded"))).toBeNull();
+    expect(restartReasonOf(new Error("network"))).toBeNull();
   });
 });
 

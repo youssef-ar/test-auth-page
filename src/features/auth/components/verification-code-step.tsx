@@ -6,7 +6,7 @@ import { useIntlayer, useLocale } from "next-intlayer";
 import { useEffect, useRef, useState } from "react";
 import { OtpInput } from "@/components/ui/otp-input";
 import { authClient } from "@/lib/auth-client";
-import { AuthRequestError, callAuth } from "../errors";
+import { AuthRequestError, callAuth, endOfSignInAttempt, type RestartReason, restartReasonOf } from "../errors";
 import { type MfaSession, mfaSession } from "../mfa-session";
 import { useAuthErrorMessage } from "../use-auth-error-message";
 import { useCooldown } from "../use-cooldown";
@@ -27,7 +27,8 @@ const variantOf = (methods: MfaSession["methods"]): Variant => {
 };
 
 const verifyCode = async (variant: Variant, emailCodeRequested: boolean, code: string) => {
-  const totp = () => callAuth((fetchOptions) => authClient.twoFactor.verifyTotp({ code, fetchOptions }));
+  const totp = () =>
+    callAuth((fetchOptions) => authClient.twoFactor.verifyTotp({ code, fetchOptions })).catch(endOfSignInAttempt);
   const otp = () => callAuth((fetchOptions) => authClient.twoFactor.verifyOtp({ code, fetchOptions }));
 
   if (variant === "totp" || (variant === "both" && !emailCodeRequested)) return totp();
@@ -42,10 +43,10 @@ const verifyCode = async (variant: Variant, emailCodeRequested: boolean, code: s
 
 type VerificationCodeStepProps = {
   session: MfaSession;
-  onExpired: () => void;
+  onRestart: (reason: RestartReason) => void;
 };
 
-export const VerificationCodeStep = ({ session, onExpired }: VerificationCodeStepProps) => {
+export const VerificationCodeStep = ({ session, onRestart }: VerificationCodeStepProps) => {
   const content = useIntlayer("mfa");
   const { locale } = useLocale();
   const router = useRouter();
@@ -57,7 +58,8 @@ export const VerificationCodeStep = ({ session, onExpired }: VerificationCodeSte
   const [status, setStatus] = useState("");
 
   const handleError = (cause: unknown) => {
-    if (cause instanceof AuthRequestError && cause.key === "sessionExpired") return onExpired();
+    const restartReason = restartReasonOf(cause);
+    if (restartReason) return onRestart(restartReason);
     setError(cause);
   };
 

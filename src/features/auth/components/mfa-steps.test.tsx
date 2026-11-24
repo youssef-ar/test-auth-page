@@ -55,7 +55,7 @@ beforeEach(() => {
 describe("VerificationCodeStep", () => {
   it("app only: verifies with the app code and offers no email option", async () => {
     twoFactor.verifyTotp.mockImplementation(ok);
-    renderWithQuery(<VerificationCodeStep session={session(["totp"])} onExpired={vi.fn()} />);
+    renderWithQuery(<VerificationCodeStep session={session(["totp"])} onRestart={vi.fn()} />);
 
     expect(screen.queryByText("mfa.sendEmailCode")).not.toBeInTheDocument();
     expect(screen.queryByText("mfa.resendCode")).not.toBeInTheDocument();
@@ -69,7 +69,7 @@ describe("VerificationCodeStep", () => {
 
   it("email only: sends a code on arrival, once, and starts the countdown", async () => {
     twoFactor.sendOtp.mockImplementation(ok);
-    renderWithQuery(<VerificationCodeStep session={session(["otp"])} onExpired={vi.fn()} />);
+    renderWithQuery(<VerificationCodeStep session={session(["otp"])} onRestart={vi.fn()} />);
 
     await vi.waitFor(() => expect(twoFactor.sendOtp).toHaveBeenCalledTimes(1));
     const resend = await screen.findByRole("button", { name: /mfa.resendCode/ });
@@ -78,7 +78,7 @@ describe("VerificationCodeStep", () => {
   });
 
   it("email only: does not send again when a code was already requested (after a reload)", async () => {
-    renderWithQuery(<VerificationCodeStep session={session(["otp"], { emailCodeRequested: true })} onExpired={vi.fn()} />);
+    renderWithQuery(<VerificationCodeStep session={session(["otp"], { emailCodeRequested: true })} onRestart={vi.fn()} />);
     expect(screen.getByRole("button", { name: /mfa.resendCode/ })).toBeEnabled();
     expect(twoFactor.sendOtp).not.toHaveBeenCalled();
   });
@@ -86,7 +86,7 @@ describe("VerificationCodeStep", () => {
   it("app + email: the email link sends a code", async () => {
     twoFactor.sendOtp.mockImplementation(ok);
     mfaSession.start(["totp", "otp"]);
-    renderWithQuery(<VerificationCodeStep session={session(["totp", "otp"])} onExpired={vi.fn()} />);
+    renderWithQuery(<VerificationCodeStep session={session(["totp", "otp"])} onRestart={vi.fn()} />);
     expect(twoFactor.sendOtp).not.toHaveBeenCalled();
 
     await userEvent.click(screen.getByRole("button", { name: "mfa.sendEmailCode" }));
@@ -101,7 +101,7 @@ describe("VerificationCodeStep", () => {
     twoFactor.verifyOtp.mockImplementation(failWith(401, "INVALID_CODE"));
     twoFactor.verifyTotp.mockImplementation(ok);
     renderWithQuery(
-      <VerificationCodeStep session={session(["totp", "otp"], { emailCodeRequested: true })} onExpired={vi.fn()} />,
+      <VerificationCodeStep session={session(["totp", "otp"], { emailCodeRequested: true })} onRestart={vi.fn()} />,
     );
 
     await enterCode();
@@ -112,7 +112,7 @@ describe("VerificationCodeStep", () => {
 
   it("shows a wrong code and clears the boxes", async () => {
     twoFactor.verifyTotp.mockImplementation(failWith(401, "INVALID_CODE"));
-    renderWithQuery(<VerificationCodeStep session={session(["totp"])} onExpired={vi.fn()} />);
+    renderWithQuery(<VerificationCodeStep session={session(["totp"])} onRestart={vi.fn()} />);
 
     await enterCode();
     expect(await screen.findByText("auth-errors.invalidCode")).toBeInTheDocument();
@@ -122,16 +122,38 @@ describe("VerificationCodeStep", () => {
 
   it("sends the user back to sign-in when the attempt expired", async () => {
     twoFactor.verifyTotp.mockImplementation(failWith(401, "INVALID_TWO_FACTOR_COOKIE"));
-    const onExpired = vi.fn();
-    renderWithQuery(<VerificationCodeStep session={session(["totp"])} onExpired={onExpired} />);
+    const onRestart = vi.fn();
+    renderWithQuery(<VerificationCodeStep session={session(["totp"])} onRestart={onRestart} />);
 
     await enterCode();
-    await vi.waitFor(() => expect(onExpired).toHaveBeenCalled());
+    await vi.waitFor(() => expect(onRestart).toHaveBeenCalledWith("sessionExpired"));
+  });
+
+  it("app code: too many tries ends the sign-in attempt", async () => {
+    twoFactor.verifyTotp.mockImplementation(failWith(400, "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE"));
+    const onRestart = vi.fn();
+    renderWithQuery(<VerificationCodeStep session={session(["totp"])} onRestart={onRestart} />);
+
+    await enterCode();
+    await vi.waitFor(() => expect(onRestart).toHaveBeenCalledWith("signInAttemptsExceeded"));
+  });
+
+  it("email code: too many tries asks for a new code and stays on the screen", async () => {
+    twoFactor.verifyOtp.mockImplementation(failWith(400, "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE"));
+    const onRestart = vi.fn();
+    renderWithQuery(
+      <VerificationCodeStep session={session(["otp"], { emailCodeRequested: true })} onRestart={onRestart} />,
+    );
+
+    await enterCode();
+    expect(await screen.findByText("auth-errors.codeAttemptsExceeded")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /mfa.resendCode/ })).toBeInTheDocument();
+    expect(onRestart).not.toHaveBeenCalled();
   });
 
   it("follows the server's wait time when a send is refused", async () => {
     twoFactor.sendOtp.mockImplementation(failWith(429, undefined, { "X-Retry-After": "17" }));
-    renderWithQuery(<VerificationCodeStep session={session(["otp"])} onExpired={vi.fn()} />);
+    renderWithQuery(<VerificationCodeStep session={session(["otp"])} onRestart={vi.fn()} />);
 
     expect(await screen.findByRole("button", { name: /mfa.resendCode/ })).toHaveTextContent(
       'mfa.cooldown({"seconds":17})',
@@ -142,7 +164,7 @@ describe("VerificationCodeStep", () => {
 describe("RecoveryCodeStep", () => {
   it("signs in with a recovery code", async () => {
     twoFactor.verifyBackupCode.mockImplementation(ok);
-    renderWithQuery(<RecoveryCodeStep onExpired={vi.fn()} />);
+    renderWithQuery(<RecoveryCodeStep onRestart={vi.fn()} />);
 
     await userEvent.type(screen.getByLabelText("mfa.recovery.label"), "  abcde-fghij ");
     await userEvent.click(screen.getByRole("button", { name: "mfa.recovery.submit" }));
@@ -153,11 +175,22 @@ describe("RecoveryCodeStep", () => {
 
   it("shows a used or wrong recovery code", async () => {
     twoFactor.verifyBackupCode.mockImplementation(failWith(401, "INVALID_BACKUP_CODE"));
-    renderWithQuery(<RecoveryCodeStep onExpired={vi.fn()} />);
+    renderWithQuery(<RecoveryCodeStep onRestart={vi.fn()} />);
 
     await userEvent.type(screen.getByLabelText("mfa.recovery.label"), "used-code");
     await userEvent.click(screen.getByRole("button", { name: "mfa.recovery.submit" }));
 
     expect(await screen.findByText("auth-errors.invalidRecoveryCode")).toBeInTheDocument();
+  });
+
+  it("too many tries ends the sign-in attempt (shared with app codes)", async () => {
+    twoFactor.verifyBackupCode.mockImplementation(failWith(400, "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE"));
+    const onRestart = vi.fn();
+    renderWithQuery(<RecoveryCodeStep onRestart={onRestart} />);
+
+    await userEvent.type(screen.getByLabelText("mfa.recovery.label"), "wrong-code");
+    await userEvent.click(screen.getByRole("button", { name: "mfa.recovery.submit" }));
+
+    await vi.waitFor(() => expect(onRestart).toHaveBeenCalledWith("signInAttemptsExceeded"));
   });
 });

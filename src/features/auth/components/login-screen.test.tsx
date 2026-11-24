@@ -98,6 +98,22 @@ describe("LoginScreen", () => {
     expect(window.sessionStorage.getItem("stolos:mfa")).toBeNull();
   });
 
+  it("goes back to sign-in with an explanation when the app-code tries are used up", async () => {
+    auth.signIn.mockResolvedValue({ data: { twoFactorRedirect: true, twoFactorMethods: ["totp"] }, error: null });
+    auth.verifyTotp.mockImplementation(async ({ fetchOptions }: { fetchOptions: FetchOptions }) => {
+      fetchOptions.onError({ response: new Response(null, { status: 400 }) });
+      return { data: null, error: { status: 400, code: "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE" } };
+    });
+    renderScreen();
+    await signIn();
+    await screen.findByRole("heading", { name: "mfa.title" });
+
+    await enterCode();
+
+    expect(await screen.findByText("auth-errors.signInAttemptsExceeded")).toBeInTheDocument();
+    expect(window.sessionStorage.getItem("stolos:mfa")).toBeNull();
+  });
+
   it("signs in through the verification screen", async () => {
     auth.signIn.mockResolvedValue({ data: { twoFactorRedirect: true, twoFactorMethods: ["totp"] }, error: null });
     auth.verifyTotp.mockResolvedValue({ data: { token: "t" }, error: null });
