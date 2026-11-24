@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactNode } from "react";
+import { Activity, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SignInForm } from "./sign-in-form";
 import { SignUpForm } from "./sign-up-form";
@@ -38,6 +38,27 @@ beforeEach(() => {
 });
 
 describe("SignInForm", () => {
+  it("is not left loading when Next restores the page after a successful sign-in", async () => {
+    auth.signIn.mockResolvedValue({ data: { token: "t", user: {} }, error: null });
+    const client = new QueryClient();
+    const page = (mode: "visible" | "hidden") => (
+      <QueryClientProvider client={client}>
+        <Activity mode={mode}>
+          <SignInForm onTwoFactorRequired={vi.fn()} />
+        </Activity>
+      </QueryClientProvider>
+    );
+    const { rerender } = render(page("visible"));
+    await fillSignIn();
+    await vi.waitFor(() => expect(replace).toHaveBeenCalled());
+    expect(screen.getByRole("button", { name: "auth-form.signIn" })).toBeDisabled();
+
+    rerender(page("hidden"));
+    rerender(page("visible"));
+
+    expect(screen.getByRole("button", { name: "auth-form.signIn" })).toBeEnabled();
+  });
+
   it("validates the fields before calling the server", async () => {
     renderWithQuery(<SignInForm onTwoFactorRequired={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "auth-form.signIn" }));
