@@ -1,25 +1,20 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useIntlayer, useLocale } from "next-intlayer";
 import { FormError } from "@/features/auth/components/form-error";
 import { callAuth } from "@/features/auth/errors";
 import { authClient } from "@/lib/auth-client";
+import { hardNavigate } from "@/lib/hard-navigate";
 import { PrimaryButton } from "@/features/auth/components/primary-button";
 
 export const SignOutButton = () => {
   const { signOut: label, signOutError } = useIntlayer("dashboard");
   const { locale } = useLocale();
-  const router = useRouter();
 
   const signOut = useMutation({
     mutationFn: () => callAuth((fetchOptions) => authClient.signOut({ fetchOptions })),
-    onSuccess: () => {
-      router.replace(`/${locale}/login`);
-      // Drops the cached dashboard so "back" can't show it again.
-      router.refresh();
-    },
+    onSuccess: () => hardNavigate(`/${locale}/login`),
   });
 
   return (

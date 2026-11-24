@@ -6,8 +6,8 @@ import { SignOutButton } from "./sign-out-button";
 
 vi.mock("next-intlayer", async () => (await import("@/test/intlayer-mock")).intlayerMock);
 
-const router = vi.hoisted(() => ({ replace: vi.fn(), refresh: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => router }));
+const hardNavigate = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/hard-navigate", () => ({ hardNavigate }));
 
 const auth = vi.hoisted(() => ({ signOut: vi.fn() }));
 vi.mock("@/lib/auth-client", () => ({ authClient: auth }));
@@ -22,15 +22,14 @@ const renderButton = () =>
 beforeEach(() => vi.clearAllMocks());
 
 describe("SignOutButton", () => {
-  it("signs out and goes back to the sign-in page", async () => {
+  it("signs out and reloads the sign-in page, dropping the signed-in client state", async () => {
     auth.signOut.mockResolvedValue({ data: { success: true }, error: null });
     renderButton();
 
     await userEvent.click(screen.getByRole("button", { name: "dashboard.signOut" }));
 
     expect(auth.signOut).toHaveBeenCalled();
-    await vi.waitFor(() => expect(router.replace).toHaveBeenCalledWith("/en/login"));
-    expect(router.refresh).toHaveBeenCalled();
+    await vi.waitFor(() => expect(hardNavigate).toHaveBeenCalledWith("/en/login"));
   });
 
   it("stays and explains when signing out fails", async () => {
@@ -40,6 +39,6 @@ describe("SignOutButton", () => {
     await userEvent.click(screen.getByRole("button", { name: "dashboard.signOut" }));
 
     expect(await screen.findByText("dashboard.signOutError")).toBeInTheDocument();
-    expect(router.replace).not.toHaveBeenCalled();
+    expect(hardNavigate).not.toHaveBeenCalled();
   });
 });

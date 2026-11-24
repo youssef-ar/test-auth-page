@@ -17,6 +17,7 @@ import { useAuthErrorMessage } from "../use-auth-error-message";
 import { useValidationMessages } from "../use-validation-messages";
 import { FormError } from "./form-error";
 import { PrimaryButton } from "./primary-button";
+import { useResetWhenHidden } from "@/lib/use-reset-when-hidden";
 
 type SignInFormProps = {
   notice?: string;
@@ -46,6 +47,8 @@ export const SignInForm = ({ notice, onTwoFactorRequired }: SignInFormProps) => 
       else router.replace(`/${locale}/dashboard`);
     },
   });
+
+  useResetWhenHidden(signIn.reset);
 
   const isBusy = signIn.isPending || (signIn.isSuccess && !readTwoFactorMethods(signIn.data));
 

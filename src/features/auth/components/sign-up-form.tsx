@@ -15,6 +15,7 @@ import { useAuthErrorMessage } from "../use-auth-error-message";
 import { useValidationMessages } from "../use-validation-messages";
 import { FormError } from "./form-error";
 import { PrimaryButton } from "./primary-button";
+import { useResetWhenHidden } from "@/lib/use-reset-when-hidden";
 
 // Better Auth requires a name; the Figma form has none, so the email's local part stands in.
 const nameFromEmail = (email: string) => email.split("@")[0];
@@ -47,6 +48,8 @@ export const SignUpForm = () => {
       }
     },
   });
+
+  useResetWhenHidden(signUp.reset);
 
   const isEmailTaken = signUp.error instanceof AuthRequestError && signUp.error.key === "emailTaken";
   const visibilityLabels = { show: content.showPassword.value, hide: content.hidePassword.value };
