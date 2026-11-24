@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { TextField } from "@/components/ui/text-field";
 import { authClient } from "@/lib/auth-client";
-import { AuthRequestError, callAuth } from "../errors";
+import { callAuth, endOfSignInAttempt, type RestartReason, restartReasonOf } from "../errors";
 import { mfaSession } from "../mfa-session";
 import { useAuthErrorMessage } from "../use-auth-error-message";
 import { AuthCard } from "./auth-card";
@@ -17,7 +17,7 @@ import { FormError } from "./form-error";
 import { TextButton } from "./text-button";
 import { PrimaryButton } from "./primary-button";
 
-export const RecoveryCodeStep = ({ onExpired }: { onExpired: () => void }) => {
+export const RecoveryCodeStep = ({ onRestart }: { onRestart: (reason: RestartReason) => void }) => {
   const { recovery } = useIntlayer("mfa");
   const { locale } = useLocale();
   const router = useRouter();
@@ -37,13 +37,16 @@ export const RecoveryCodeStep = ({ onExpired }: { onExpired: () => void }) => {
 
   const verify = useMutation({
     mutationFn: ({ code }: { code: string }) =>
-      callAuth((fetchOptions) => authClient.twoFactor.verifyBackupCode({ code, fetchOptions })),
+      callAuth((fetchOptions) => authClient.twoFactor.verifyBackupCode({ code, fetchOptions })).catch(
+        endOfSignInAttempt,
+      ),
     onSuccess: () => {
       mfaSession.clear();
       router.replace(`/${locale}/dashboard`);
     },
     onError: (error) => {
-      if (error instanceof AuthRequestError && error.key === "sessionExpired") onExpired();
+      const restartReason = restartReasonOf(error);
+      if (restartReason) onRestart(restartReason);
       else setFocus("code", { shouldSelect: true });
     },
   });

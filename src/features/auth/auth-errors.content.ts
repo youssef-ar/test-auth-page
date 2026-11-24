@@ -20,6 +20,10 @@ const authErrorsContent = {
       fr: "Votre tentative de connexion a expiré. Veuillez vous reconnecter.",
       en: "Your sign-in attempt has expired. Please sign in again.",
     }),
+    signInAttemptsExceeded: t({
+      fr: "Trop d’essais incorrects. Reconnectez-vous pour recommencer la vérification.",
+      en: "Too many incorrect tries. Sign in again to restart the verification.",
+    }),
     invalidRecoveryCode: t({
       fr: "Ce code de récupération est invalide ou a déjà été utilisé.",
       en: "This recovery code is invalid or has already been used.",

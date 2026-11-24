@@ -9,24 +9,25 @@ import { RecoveryCodeStep } from "./recovery-code-step";
 import { SignInForm } from "./sign-in-form";
 import { SignUpForm } from "./sign-up-form";
 import { VerificationCodeStep } from "./verification-code-step";
+import type { RestartReason } from "../errors";
 import { mfaSession, useMfaSession } from "../mfa-session";
 
 type AuthTab = "signin" | "signup";
 
 export const LoginScreen = () => {
   const [tab, setTab] = useState<AuthTab>("signin");
-  const [isExpired, setIsExpired] = useState(false);
+  const [restartReason, setRestartReason] = useState<RestartReason | null>(null);
   const content = useIntlayer("login-page");
   const errors = useIntlayer("auth-errors");
   const session = useMfaSession();
 
-  const onExpired = () => {
+  const onRestart = (reason: RestartReason) => {
     mfaSession.clear();
-    setIsExpired(true);
+    setRestartReason(reason);
   };
 
-  if (session?.view === "recovery") return <RecoveryCodeStep onExpired={onExpired} />;
-  if (session) return <VerificationCodeStep session={session} onExpired={onExpired} />;
+  if (session?.view === "recovery") return <RecoveryCodeStep onRestart={onRestart} />;
+  if (session) return <VerificationCodeStep session={session} onRestart={onRestart} />;
 
   return (
     <AuthCard
@@ -46,9 +47,9 @@ export const LoginScreen = () => {
             label: content.signin.tab,
             panel: (
               <SignInForm
-                notice={isExpired ? errors.sessionExpired.value : undefined}
+                notice={restartReason ? errors[restartReason].value : undefined}
                 onTwoFactorRequired={(methods) => {
-                  setIsExpired(false);
+                  setRestartReason(null);
                   mfaSession.start(methods);
                 }}
               />
